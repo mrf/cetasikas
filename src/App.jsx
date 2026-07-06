@@ -188,8 +188,8 @@ function getAllItems() {
 function computePositions(width, height) {
   const cx = width / 2;
   const cy = height / 2;
-  const maxR = Math.min(cx, cy) - 40;
-  const ringRadii = [maxR * 0.1, maxR * 0.3, maxR * 0.58, maxR * 0.87];
+  const maxR = Math.min(cx, cy) - 70;
+  const ringRadii = [maxR * 0.31, maxR * 0.58, maxR * 0.8, maxR * 1.06];
   const positions = {};
 
   Object.entries(CATEGORIES).forEach(([catKey, cat]) => {
@@ -245,14 +245,14 @@ export default function CetasikasMandala() {
   const [showConnections, setShowConnections] = useState(true);
   const [filterRing, setFilterRing] = useState(null);
   const containerRef = useRef(null);
-  const [dims, setDims] = useState({ w: 1100, h: 1100 });
+  const [dims, setDims] = useState({ w: 1240, h: 1240 });
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const obs = new ResizeObserver(entries => {
       const { width } = entries[0].contentRect;
-      const size = Math.min(width, 1100);
+      const size = Math.min(width, 1240);
       setDims({ w: size, h: size });
     });
     obs.observe(el);
@@ -366,7 +366,7 @@ export default function CetasikasMandala() {
       </div>
 
       {/* SVG Mandala */}
-      <div ref={containerRef} style={{ width: "100%", maxWidth: 1100, aspectRatio: "1" }}>
+      <div ref={containerRef} style={{ width: "100%", maxWidth: 1240, aspectRatio: "1" }}>
         <svg
           viewBox={`0 0 ${dims.w} ${dims.h}`}
           width="100%"
