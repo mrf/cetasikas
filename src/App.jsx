@@ -211,6 +211,34 @@ function computePositions(width, height) {
   return { positions, ringRadii, cx, cy };
 }
 
+function estimateTextWidth(text, fontSize) {
+  return [...text].reduce((width, char) => {
+    if (char === " ") return width + fontSize * 0.28;
+    if ("āīūṅñṭḍṇḷṃĀĪŪṄÑṬḌṆḶṂ".includes(char)) return width + fontSize * 0.62;
+    if (char === "-" || char === "–") return width + fontSize * 0.32;
+    return width + fontSize * 0.52;
+  }, 0);
+}
+
+function getNodeSize(item, isSelected) {
+  const paliFont = isSelected ? 13 : 11;
+  const englishFont = isSelected ? 10 : 8.5;
+  const horizontalPadding = isSelected ? 38 : 30;
+  const minWidth = isSelected ? 112 : item.ring === 0 ? 96 : 86;
+  const width = Math.ceil(Math.max(
+    minWidth,
+    estimateTextWidth(item.pali, paliFont) + horizontalPadding,
+    estimateTextWidth(item.english, englishFont) + horizontalPadding
+  ));
+
+  return {
+    width,
+    height: isSelected ? 58 : item.ring === 0 ? 50 : 44,
+    paliFont,
+    englishFont,
+  };
+}
+
 export default function CetasikasMandala() {
   const [selected, setSelected] = useState(null);
   const [hoveredCat, setHoveredCat] = useState(null);
@@ -240,6 +268,7 @@ export default function CetasikasMandala() {
   const activeConnections = selected
     ? CONNECTIONS.filter(c => c.from === selected || c.to === selected)
     : [];
+  const visibleConnections = selected ? activeConnections : CONNECTIONS;
 
   const dimmed = (item) => {
     if (filterRing !== null && item.ring !== filterRing) return true;
@@ -344,6 +373,26 @@ export default function CetasikasMandala() {
           height="100%"
           style={{ overflow: "visible" }}
         >
+          {/* Connection lines */}
+          {showConnections && visibleConnections.map((conn, i) => {
+            const from = positions[conn.from];
+            const to = positions[conn.to];
+            if (!from || !to) return null;
+            const isAntidote = conn.type === "antidote";
+            const isActive = selected && (conn.from === selected || conn.to === selected);
+            return (
+              <line
+                key={i}
+                x1={from.x} y1={from.y}
+                x2={to.x} y2={to.y}
+                stroke={isAntidote ? "#FFD70044" : "#8B9DAF33"}
+                strokeWidth={isActive ? 2.5 : 1}
+                strokeDasharray={isAntidote ? "none" : "3 4"}
+                opacity={isActive ? 0.9 : 0.3}
+              />
+            );
+          })}
+
           {/* Ring backgrounds */}
           {ringRadii.map((r, i) => (
             <circle
@@ -365,37 +414,24 @@ export default function CetasikasMandala() {
             consciousness
           </text>
 
-          {/* Connection lines */}
-          {showConnections && (selected ? activeConnections : CONNECTIONS).map((conn, i) => {
+          {/* Active connection labels */}
+          {showConnections && selected && activeConnections.map((conn, i) => {
             const from = positions[conn.from];
             const to = positions[conn.to];
             if (!from || !to) return null;
-            const isAntidote = conn.type === "antidote";
-            const isActive = selected && (conn.from === selected || conn.to === selected);
             return (
-              <g key={i}>
-                <line
-                  x1={from.x} y1={from.y}
-                  x2={to.x} y2={to.y}
-                  stroke={isAntidote ? "#FFD70044" : "#8B9DAF33"}
-                  strokeWidth={isActive ? 2.5 : 1}
-                  strokeDasharray={isAntidote ? "none" : "3 4"}
-                  opacity={isActive ? 0.9 : 0.3}
-                />
-                {isActive && (
-                  <text
-                    x={(from.x + to.x) / 2}
-                    y={(from.y + to.y) / 2 - 6}
-                    textAnchor="middle"
-                    fill="#E8E0D0"
-                    fontSize={11}
-                    fontFamily="'Crimson Pro', serif"
-                    opacity={0.7}
-                  >
-                    {conn.label}
-                  </text>
-                )}
-              </g>
+              <text
+                key={i}
+                x={(from.x + to.x) / 2}
+                y={(from.y + to.y) / 2 - 6}
+                textAnchor="middle"
+                fill="#E8E0D0"
+                fontSize={11}
+                fontFamily="'Crimson Pro', serif"
+                opacity={0.7}
+              >
+                {conn.label}
+              </text>
             );
           })}
 
@@ -406,7 +442,8 @@ export default function CetasikasMandala() {
             const isSelected = selected === item.pali;
             const isDimmed = dimmed(item);
             const isConnected = selected && activeConnections.some(c => c.from === item.pali || c.to === item.pali);
-            const nodeR = isSelected ? 34 : item.ring === 0 ? 28 : 24;
+            const node = getNodeSize(item, isSelected);
+            const glowR = Math.max(node.width, node.height) / 2 + 10;
 
             return (
               <g
@@ -417,13 +454,18 @@ export default function CetasikasMandala() {
               >
                 {/* Glow for selected */}
                 {isSelected && (
-                  <circle cx={pos.x} cy={pos.y} r={nodeR + 10} fill={item.color} opacity={0.12} />
+                  <ellipse cx={pos.x} cy={pos.y} rx={node.width / 2 + 10} ry={node.height / 2 + 10} fill={item.color} opacity={0.12} />
                 )}
                 {isConnected && !isSelected && (
-                  <circle cx={pos.x} cy={pos.y} r={nodeR + 7} fill="#FFD700" opacity={0.08} />
+                  <ellipse cx={pos.x} cy={pos.y} rx={glowR} ry={node.height / 2 + 7} fill="#FFD700" opacity={0.08} />
                 )}
-                <circle
-                  cx={pos.x} cy={pos.y} r={nodeR}
+                <rect
+                  x={pos.x - node.width / 2}
+                  y={pos.y - node.height / 2}
+                  width={node.width}
+                  height={node.height}
+                  rx={node.height / 2}
+                  ry={node.height / 2}
                   fill={isSelected ? item.color : `${item.color}22`}
                   stroke={item.color}
                   strokeWidth={isSelected ? 3 : isConnected ? 2.5 : 1.5}
@@ -432,10 +474,10 @@ export default function CetasikasMandala() {
                 {/* Pali label */}
                 <text
                   x={pos.x}
-                  y={pos.y - (nodeR > 26 ? 5 : 3)}
+                  y={pos.y - (isSelected ? 6 : 4)}
                   textAnchor="middle"
                   fill={isSelected ? "#0C0E13" : "#E8E0D0"}
-                  fontSize={isSelected ? 13 : 11}
+                  fontSize={node.paliFont}
                   fontFamily="'Crimson Pro', serif"
                   fontWeight={isSelected ? 700 : 400}
                 >
@@ -444,10 +486,10 @@ export default function CetasikasMandala() {
                 {/* English label */}
                 <text
                   x={pos.x}
-                  y={pos.y + (nodeR > 26 ? 10 : 8)}
+                  y={pos.y + (isSelected ? 12 : 10)}
                   textAnchor="middle"
                   fill={isSelected ? "#0C0E13" : item.color}
-                  fontSize={isSelected ? 10 : 8.5}
+                  fontSize={node.englishFont}
                   fontFamily="'Crimson Pro', serif"
                   fontStyle="italic"
                   opacity={isSelected ? 1 : 0.8}
