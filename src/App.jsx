@@ -178,7 +178,7 @@ const CONNECTIONS = [
 function getAllItems() {
   const items = [];
   Object.entries(CATEGORIES).forEach(([catKey, cat]) => {
-    cat.items.forEach((item, idx) => {
+    cat.items.forEach((item) => {
       items.push({ ...item, category: catKey, color: cat.color, ring: cat.ring, catLabel: cat.label });
     });
   });
@@ -192,7 +192,7 @@ function computePositions(width, height) {
   const ringRadii = [maxR * 0.31, maxR * 0.58, maxR * 0.8, maxR * 1.06];
   const positions = {};
 
-  Object.entries(CATEGORIES).forEach(([catKey, cat]) => {
+  Object.values(CATEGORIES).forEach((cat) => {
     const ringItems = Object.values(CATEGORIES).filter(c => c.ring === cat.ring);
     const ringStart = ringItems.slice(0, ringItems.indexOf(cat)).reduce((sum, c) => sum + c.items.length, 0);
     const ringTotal = ringItems.reduce((sum, c) => sum + c.items.length, 0);
