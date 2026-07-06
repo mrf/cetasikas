@@ -241,7 +241,7 @@ function getNodeSize(item, isSelected) {
 
 export default function CetasikasMandala() {
   const [selected, setSelected] = useState(null);
-  const [hoveredCat, setHoveredCat] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [showConnections, setShowConnections] = useState(true);
   const [filterRing, setFilterRing] = useState(null);
   const containerRef = useRef(null);
@@ -272,8 +272,32 @@ export default function CetasikasMandala() {
 
   const dimmed = (item) => {
     if (filterRing !== null && item.ring !== filterRing) return true;
-    if (hoveredCat && item.category !== hoveredCat) return true;
+    if (activeCategory && item.category !== activeCategory) return true;
     return false;
+  };
+
+  const controlLabelStyle = {
+    color: "#5a6070",
+    fontSize: 10,
+    letterSpacing: 0,
+    marginBottom: 6,
+    textAlign: "center",
+    textTransform: "uppercase",
+  };
+
+  const controlRowStyle = {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  };
+
+  const baseFilterButtonStyle = {
+    borderRadius: 20,
+    cursor: "pointer",
+    fontSize: 12,
+    fontFamily: "inherit",
+    padding: "4px 14px",
   };
 
   return (
@@ -319,50 +343,98 @@ export default function CetasikasMandala() {
         Click any seed to explore. Lines show antidote pairs and conditioning relationships.
       </p>
 
-      {/* Ring filter buttons */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 16 }}>
-        <button
-          onClick={() => setFilterRing(null)}
-          style={{
-            background: filterRing === null ? "rgba(232,224,208,0.15)" : "transparent",
-            border: "1px solid rgba(232,224,208,0.2)",
-            color: "#E8E0D0",
-            padding: "4px 14px",
-            borderRadius: 20,
-            cursor: "pointer",
-            fontSize: 12,
-            fontFamily: "inherit",
-          }}
-        >All</button>
-        {[0,1,2,3].map(r => (
+      {/* Filters */}
+      <div style={{
+        width: "100%",
+        maxWidth: 1040,
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        marginBottom: 16,
+      }}>
+        <div>
+          <div style={controlLabelStyle}>Rings</div>
+          <div style={controlRowStyle}>
+            <button
+              aria-pressed={filterRing === null}
+              onClick={() => setFilterRing(null)}
+              style={{
+                ...baseFilterButtonStyle,
+                background: filterRing === null ? "rgba(232,224,208,0.15)" : "transparent",
+                border: "1px solid rgba(232,224,208,0.2)",
+                color: "#E8E0D0",
+              }}
+            >All Rings</button>
+            {[0,1,2,3].map(r => (
+              <button
+                key={r}
+                aria-pressed={filterRing === r}
+                onClick={() => setFilterRing(filterRing === r ? null : r)}
+                style={{
+                  ...baseFilterButtonStyle,
+                  background: filterRing === r ? "rgba(232,224,208,0.15)" : "transparent",
+                  border: `1px solid ${RING_COLORS[r].border}`,
+                  color: r === 2 ? "#CD5C5C" : r === 3 ? "#3CB371" : r === 0 ? "#C9A84C" : "#8B9DAF",
+                }}
+              >{RING_LABELS[r]}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={controlLabelStyle}>Categories</div>
+          <div style={controlRowStyle}>
+            <button
+              aria-pressed={activeCategory === null}
+              onClick={() => setActiveCategory(null)}
+              style={{
+                ...baseFilterButtonStyle,
+                background: activeCategory === null ? "rgba(232,224,208,0.15)" : "transparent",
+                border: "1px solid rgba(232,224,208,0.2)",
+                color: "#E8E0D0",
+              }}
+            >All Categories</button>
+            {Object.entries(CATEGORIES).map(([key, cat]) => (
+              <button
+                key={key}
+                aria-pressed={activeCategory === key}
+                onClick={() => setActiveCategory(activeCategory === key ? null : key)}
+                style={{
+                  ...baseFilterButtonStyle,
+                  background: activeCategory === key ? `${cat.color}22` : "transparent",
+                  border: `1px solid ${activeCategory === key ? `${cat.color}99` : `${cat.color}44`}`,
+                  color: cat.color,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  opacity: activeCategory && activeCategory !== key ? 0.55 : 1,
+                }}
+              >
+                <span style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: cat.color,
+                  display: "inline-block",
+                }} />
+                <span>{cat.label} ({cat.items.length})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={controlRowStyle}>
           <button
-            key={r}
-            onClick={() => setFilterRing(filterRing === r ? null : r)}
+            aria-pressed={showConnections}
+            onClick={() => setShowConnections(!showConnections)}
             style={{
-              background: filterRing === r ? "rgba(232,224,208,0.15)" : "transparent",
-              border: `1px solid ${RING_COLORS[r].border}`,
-              color: r === 2 ? "#CD5C5C" : r === 3 ? "#3CB371" : r === 0 ? "#C9A84C" : "#8B9DAF",
-              padding: "4px 14px",
-              borderRadius: 20,
-              cursor: "pointer",
-              fontSize: 12,
-              fontFamily: "inherit",
+              ...baseFilterButtonStyle,
+              background: showConnections ? "rgba(232,224,208,0.12)" : "transparent",
+              border: "1px solid rgba(232,224,208,0.15)",
+              color: "#8B9DAF",
             }}
-          >{RING_LABELS[r]}</button>
-        ))}
-        <button
-          onClick={() => setShowConnections(!showConnections)}
-          style={{
-            background: showConnections ? "rgba(232,224,208,0.12)" : "transparent",
-            border: "1px solid rgba(232,224,208,0.15)",
-            color: "#8B9DAF",
-            padding: "4px 14px",
-            borderRadius: 20,
-            cursor: "pointer",
-            fontSize: 12,
-            fontFamily: "inherit",
-          }}
-        >{showConnections ? "⟷ Hide Lines" : "⟷ Show Lines"}</button>
+          >{showConnections ? "⟷ Hide Lines" : "⟷ Show Lines"}</button>
+        </div>
       </div>
 
       {/* SVG Mandala */}
@@ -500,42 +572,6 @@ export default function CetasikasMandala() {
             );
           })}
         </svg>
-      </div>
-
-      {/* Category Legend */}
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "6px 16px",
-        justifyContent: "center",
-        marginTop: 16,
-        marginBottom: 12,
-      }}>
-        {Object.entries(CATEGORIES).map(([key, cat]) => (
-          <span
-            key={key}
-            onMouseEnter={() => setHoveredCat(key)}
-            onMouseLeave={() => setHoveredCat(null)}
-            onClick={() => setHoveredCat(hoveredCat === key ? null : key)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-              cursor: "pointer",
-              opacity: hoveredCat && hoveredCat !== key ? 0.3 : 1,
-              transition: "opacity 0.2s",
-            }}
-          >
-            <span style={{
-              width: 8, height: 8, borderRadius: "50%",
-              background: cat.color,
-              display: "inline-block",
-            }} />
-            <span style={{ fontSize: 11, color: cat.color }}>
-              {cat.label} ({cat.items.length})
-            </span>
-          </span>
-        ))}
       </div>
 
       {/* Detail panel */}
