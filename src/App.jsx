@@ -651,22 +651,55 @@ export default function CetasikasMandala() {
         </div>
       )}
 
-      {/* Seeds metaphor note */}
+      {/* About note */}
       <div style={{
-        maxWidth: 580,
-        textAlign: "center",
+        maxWidth: 760,
+        textAlign: "left",
         marginTop: 24,
-        padding: "16px 20px",
-        background: "rgba(46,139,87,0.04)",
-        border: "1px solid rgba(46,139,87,0.12)",
+        padding: "18px 22px",
+        background: "rgba(232,224,208,0.04)",
+        border: "1px solid rgba(232,224,208,0.12)",
         borderRadius: 10,
       }}>
-        <p style={{ fontSize: 13, color: "#8B9DAF", lineHeight: 1.7, margin: 0, fontStyle: "italic" }}>
-          In the Plum Village tradition, these are seeds (bīja) in store consciousness.
-          Unwholesome seeds are not enemies to destroy — they are seeds to stop watering.
-          Beautiful seeds are to be watered daily through practice, sangha, and mindful living.
-          The gold lines show antidote pairs: every unwholesome seed has a beautiful seed that transforms it.
+        <h2 style={{
+          color: "#C9A84C",
+          fontSize: 16,
+          fontWeight: 600,
+          margin: "0 0 8px",
+        }}>
+          About Cetasikas
+        </h2>
+        <p style={{ fontSize: 13, color: "#B8B0A0", lineHeight: 1.7, margin: 0 }}>
+          Cetasikas are mental factors: qualities that arise together with consciousness and shape how an object is known, felt, interpreted, and acted upon. This visualization follows the Theravāda Abhidhamma list of 52 factors, grouped as universal, occasional, unwholesome, and beautiful factors. The relationship lines are interpretive study aids for comparison and reflection, not a canonical chart.
         </p>
+        <div style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px 14px",
+          marginTop: 14,
+        }}>
+          {[
+            ["Bhikkhu Bodhi manual", "https://www.accesstoinsight.org/lib/authors/bodhi/abhiman.html"],
+            ["Abhidhammattha Saṅgaha", "https://www.palikanon.com/english/sangaha/sangaha.htm"],
+            ["Mental factors overview", "https://en.wikipedia.org/wiki/Mental_factors"],
+            ["Yogācāra comparison", "https://studybuddhism.com/en/advanced-studies/science-of-mind/mind-mental-factors/primary-minds-and-the-51-mental-factors"],
+          ].map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                color: "#8B9DAF",
+                fontSize: 12,
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   );
