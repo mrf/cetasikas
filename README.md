@@ -1,5 +1,7 @@
 # The 52 Cetasikas
 
+**[Live site →](https://mrf.github.io/cetasikas/)**
+
 An interactive mandala of the **52 cetasikas**: the mental factors described in the
 Theravāda Abhidhamma. The app is a study aid for seeing how universal, occasional,
 unwholesome, and beautiful factors are grouped, related, and named.
